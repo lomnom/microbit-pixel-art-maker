@@ -79,15 +79,12 @@ while True: #controls
 		iteration=0
 		display.set_pixel(coords[0],coords[1],3)
 	display.show(Image(parseImage(img)))
-	if pin2.read_analog()>700 and not previouslyPressed: #detect if pin0 touched (down)
+	if pin2.read_analog()>700 : 
 		buttonState=3
 		sleep(300)
 		iteration=0
-		previouslyPressed=True
 		if img[coords[1]][coords[0]]==9:
 			img[coords[1]][coords[0]]=0
 		else:
 			img[coords[1]][coords[0]]+=1
-	elif previouslyPressed:
-		previouslyPressed=False
 
