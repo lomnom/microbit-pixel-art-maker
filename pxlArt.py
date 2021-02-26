@@ -57,23 +57,25 @@ while True: #controls
 			coords[1]=4
 		display.set_pixel(coords[0],coords[1],3)
 		iteration=0
-	if button_b.was_pressed(): #detect if button b pressed(right)
+	if button_b.is_pressed(): #detect if button b pressed(right)
 		buttonState=2
-		sleep(100)
+		sleep(200)
 		if not coords[0]==4: #check if at edge
 			coords[0]+=1 #move coords to right by 1
 		else:
 			coords[0]=0
 		display.set_pixel(coords[0],coords[1],3)
 		iteration=0
-	if button_a.was_pressed(): #detect if button a pressed(left)
+	if button_a.is_pressed(): #detect if button a pressed(left)
 		buttonState=1
-		sleep(100)
+		sleep(200)
 		if not coords[0]==0: #check if at edge
 			coords[0]-=1 #move coords to left by 1
 		else:
 			coords[0]=4
-	if iteration==7: #display cursor
+		display.set_pixel(coords[0],coords[1],3)
+		iteration=0
+	if iteration==7: #display cursor if idle
 		iteration=0
 		display.set_pixel(coords[0],coords[1],3)
 		iteration=0
