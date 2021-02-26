@@ -39,7 +39,7 @@ previouslyPressed=False
 while True: #controls
 	iteration+=1#increment iteration
 	#update buttonState
-	if pin1.read_analog()>700: #detect if pin1 touched (up)
+	if pin1.read_analog()>450: #detect if pin1 touched (up)
 		buttonState=0
 		sleep(200)
 		if not coords[1]==4: #check if at edge
@@ -48,7 +48,7 @@ while True: #controls
 			coords[1]=0
 		display.set_pixel(coords[0],coords[1],3)
 		iteration=0
-	if pin0.read_analog()>700: #detect if pin0 touched (down)
+	if pin0.read_analog()>450: #detect if pin0 touched (down)
 		buttonState=3
 		sleep(200)
 		if not coords[1]==0: #check if at edge
@@ -81,7 +81,7 @@ while True: #controls
 		iteration=0
 		display.set_pixel(coords[0],coords[1],3)
 	display.show(Image(parseImage(img)))
-	if pin2.read_analog()>700 : 
+	if pin2.read_analog()>450 : 
 		buttonState=3
 		sleep(300)
 		iteration=0
