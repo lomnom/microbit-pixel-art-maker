@@ -3,12 +3,12 @@ from microbit import * #import needed library
 def parseImage(image): #function to make display easier to work with by converting list of pixels to valid format
 	output=""
 	for row in range(0,5): #iterate thru rows
-		currRow=image[row]
+		currRow=image[row] #update row of pixels var
 		for column in range(0,5): #iterate thru column in current row
-			currColumn=image[row][column]
-			output+=str(currColumn)
-		output+=":"
-	output=output[:-1]
+			currColumn=image[row][column] #update pixel var
+			output+=str(currColumn) #addd current pixel to string to output
+		output+=":" #add colon to back of current row
+	output=output[:-1] #remove last extra colon
 	return output
 
 #display pixel at top left
