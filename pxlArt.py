@@ -1,6 +1,6 @@
 from microbit import * #import needed library
 
-def parseImage(image): #function to make display easier to work with
+def parseImage(image): #function to make display easier to work with by converting list of pixels to valid format
 	output=""
 	for row in range(0,5): #iterate thru rows
 		currRow=image[row]
@@ -20,7 +20,6 @@ img=[[6,0,0,0,0],
 display.show(Image(parseImage(img)))
 
 #needed vars
-buttonState=None #0=none pressed 1=a 2=b 3=both
 direction=1 #2=upDown 1=leftRight
 coords=[0,0] #[0]=leftRight [1]=upDown currently at top left of screen
 prevHold=False
@@ -37,56 +36,56 @@ previouslyPressed=False
 
 #main loop
 while True: #controls
+
 	iteration+=1#increment iteration
-	#update buttonState
+
 	if pin1.read_analog()>550: #detect if pin1 touched (up)
-		buttonState=0
 		sleep(200)
 		if not coords[1]==4: #check if at edge
 			coords[1]+=1 #move coords to up by 1
 		else:
-			coords[1]=0
-		display.set_pixel(coords[0],coords[1],3)
-		iteration=0
+			coords[1]=0 #if at edge, move to other side
+		display.set_pixel(coords[0],coords[1],3)#print cursor to make moving more obvious
+		iteration=0 #make sure cursor doesnt flash instantly after move
+
 	if pin0.read_analog()>550: #detect if pin0 touched (down)
-		buttonState=3
-		sleep(200)
+		sleep(200) #delay
 		if not coords[1]==0: #check if at edge
 			coords[1]-=1 #move coords to down by 1
 		else:
-			coords[1]=4
-		display.set_pixel(coords[0],coords[1],3)
-		iteration=0
+			coords[1]=4 #if at egde,move to other side
+		display.set_pixel(coords[0],coords[1],3)#print cursor to make moving more obvious
+		iteration=0#make sure cursor doesnt flash instantly after move
+
 	if button_b.is_pressed(): #detect if button b pressed(right)
-		buttonState=2
-		sleep(200)
+		sleep(200) #delay
 		if not coords[0]==4: #check if at edge
 			coords[0]+=1 #move coords to right by 1
 		else:
-			coords[0]=0
-		display.set_pixel(coords[0],coords[1],3)
-		iteration=0
+			coords[0]=0 #if at edge,move to other side
+		display.set_pixel(coords[0],coords[1],3)#print cursor to make moving more obvious
+		iteration=0#make sure cursor doesnt flash instantly after move
+
 	if button_a.is_pressed(): #detect if button a pressed(left)
-		buttonState=1
-		sleep(200)
+		sleep(200) #delay
 		if not coords[0]==0: #check if at edge
 			coords[0]-=1 #move coords to left by 1
 		else:
-			coords[0]=4
+			coords[0]=4 #if at edge, move to other side
+		display.set_pixel(coords[0],coords[1],3) #print cursor to make moving more obvious
+		iteration=0 #make sure cursor doesnt flash instantly after move
+
+	if iteration==7: #display cursor if idle for 7 iterations
+		iteration=0 #move iteration back to 0
 		display.set_pixel(coords[0],coords[1],3)
-		iteration=0
-	if iteration==7: #display cursor if idle
-		iteration=0
-		display.set_pixel(coords[0],coords[1],3)
-		iteration=0
-		display.set_pixel(coords[0],coords[1],3)
-	display.show(Image(parseImage(img)))
+
+	display.show(Image(parseImage(img))) #refresh display
+
 	if pin2.read_analog()>550 : 
-		buttonState=3
-		sleep(300)
-		iteration=0
-		if img[coords[1]][coords[0]]==9:
+		sleep(300) #longer delay for easier color control
+		iteration=0 #make sure cursor doesnt flash during color changing
+		if img[coords[1]][coords[0]]==9: #make color 0 if currently 9
 			img[coords[1]][coords[0]]=0
 		else:
-			img[coords[1]][coords[0]]+=1
+			img[coords[1]][coords[0]]+=1 #increment color
 
