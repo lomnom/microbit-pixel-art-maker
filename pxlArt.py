@@ -167,7 +167,7 @@ while True: #controls
 		write("saveSlot.txt",saveSlot)
 
 	#radio
-	if pin2.read_analog()>base and button_b.is_pressed(): #transmit
+	if pin1.read_analog()>base and button_a.is_pressed(): #transmit
 		send(parseImage(img))
 		say("sent")
 
