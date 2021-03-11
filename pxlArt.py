@@ -1,4 +1,23 @@
-from microbit import * #import needed library
+from microbit import pin0,pin1,pin2,button_a,button_b,display,Image,sleep #import needed library
+
+blank=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
+
+#define needed functions
+def say(data):
+	display.scroll(data)
+
+def read(file,backup):#read file function
+	try: #load slot
+		with open(file) as content: #save save slot
+			return content.read()
+	except OSError:
+		write(file,backup)
+		return backup
+
+def write(file,data): #function to write to file
+	with open(file, 'w') as content: #save save slot
+		content.write(str(data))
+		return True
 
 def parseImage(image): #function to make display easier to work with by converting list of pixels to valid format
 	output=""
@@ -20,44 +39,34 @@ def unParseImage(image): #unparse parsed image
 			output[row][column]=int(image[char])
 	return output
 
-def read(file):#read file function
-	try: #load slot
-		with open(file) as content: #save save slot
-			return content.read()
-	except OSError:
-		return None
+def delay():
+	sleep(200)
 
-def write(file,data): #function to write to file
-	with open(file, 'w') as content: #save save slot
-		content.write(str(data))
-
+def displayCursor(coords):
+	display.set_pixel(coords[0],coords[1],3)
 
 #load images
-try: #load slot
-	with open("saveSlot.txt") as slot: #save save slot
-		saveSlot=int(slot.read())
-except OSError: #make file if nonexistent
-	with open("saveSlot.txt", 'w') as slot:
-		slot.write(str(0))
-		saveSlot=0
+saveSlot=int(read("saveSlot.txt","0"))
 
 currFile="art"+str(saveSlot) #update current file
 
-try: #load image
-	with open(currFile) as art:
-		img = unParseImage(art.read())
-except OSError:
-	with open(currFile,'w') as art:
-		img=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
-		art.write(parseImage(img))
+img=unParseImage(read(currFile,"00000:00000:00000:00000:00000")) #read art
 		
+group=int(read("group.txt","0")) #read group
 
+#init radio
+from radio import on, config, send, receive
+
+on() #on radio
+
+config(group=group) #cahnge this manually
 
 #needed vars
 coords=[0,0] 
 iteration=0
 cursor=0
 clipBoard=None
+base=770
 
 #2+0 save
 #2+1 load
@@ -69,121 +78,119 @@ while True: #controls
 
 	iteration+=1#increment iteration
 
-	if pin1.read_analog()>770: #detect if pin1 touched (up)
-		sleep(200)
+	if pin1.read_analog()>base: #detect if pin1 touched (up)
+		delay()
 		if not coords[1]==4: #check if at edge
 			coords[1]+=1 #move coords to up by 1
 		else:
 			coords[1]=0 #if at edge, move to other side
-		display.set_pixel(coords[0],coords[1],3)#print cursor to make moving more obvious
+		displayCursor(coords)#print cursor to make moving more obvious
 		iteration=0 #make sure cursor doesnt flash instantly after move
 
-	if pin0.read_analog()>770: #detect if pin0 touched (down)
-		sleep(200) #delay
+	if pin0.read_analog()>base: #detect if pin0 touched (down)
+		delay() #delay
 		if not coords[1]==0: #check if at edge
 			coords[1]-=1 #move coords to down by 1
 		else:
 			coords[1]=4 #if at egde,move to other side
-		display.set_pixel(coords[0],coords[1],3)#print cursor to make moving more obvious
+		displayCursor(coords)#print cursor to make moving more obvious
 		iteration=0#make sure cursor doesnt flash instantly after move
 
 	if button_b.is_pressed(): #detect if button b pressed(right)
-		sleep(200) #delay
+		delay() #delay
 		if not coords[0]==4: #check if at edge
 			coords[0]+=1 #move coords to right by 1
 		else:
 			coords[0]=0 #if at edge,move to other side
-		display.set_pixel(coords[0],coords[1],3)#print cursor to make moving more obvious
+		displayCursor(coords)#print cursor to make moving more obvious
 		iteration=0#make sure cursor doesnt flash instantly after move
 
 	if button_a.is_pressed(): #detect if button a pressed(left)
-		sleep(200) #delay
+		delay() #delay
 		if not coords[0]==0: #check if at edge
 			coords[0]-=1 #move coords to left by 1
 		else:
 			coords[0]=4 #if at edge, move to other side
-		display.set_pixel(coords[0],coords[1],3) #print cursor to make moving more obvious
+		displayCursor(coords) #print cursor to make moving more obvious
 		iteration=0 #make sure cursor doesnt flash instantly after move
 
 	if (iteration%7)==0: #display cursor if idle for 7 iterations
-		display.set_pixel(coords[0],coords[1],3)
+		displayCursor(coords)
+
+	if (iteration%50)==0: #check messages
+		message=receive()
+		if not message==None: #check if got new message
+			display.show(Image("66666:66066:60606:60006:66666")) #mail symbol
+			sleep("300")
+			clipBoard=unParseImage(receivedString) #put in clipboard
 
 	#loading and saving
-	if pin2.read_analog()>770 and pin0.read_analog()>770: #save 2+0
-		with open(currFile, 'w') as art:
-			display.scroll("saved")
-			art.write(parseImage(img))
+	if pin2.read_analog()>base and pin0.read_analog()>base: #save 2+0
+		write(currFile,parseImage(img))
+		say("saved")
 
-	if pin1.read_analog()>770 and pin2.read_analog()>770: #load 2+1
-		try:
-			with open(currFile) as art:
-				display.scroll("loaded")
-				img = unParseImage(art.read())
-		except OSError:
-			display.scroll("File not found. Try saving.")
+	if pin1.read_analog()>base and pin2.read_analog()>base: #load 2+1
+		img=unParseImage(read(currFile,blank))
+		say("loaded")
 
-	if pin2.read_analog()>770 and button_a.is_pressed(): #copy
+	if pin2.read_analog()>base and button_a.is_pressed(): #copy
 		clipBoard=img
-		sleep(200)
-		display.scroll("copied")
+		delay()
+		say("copied")
 
-	if pin1.read_analog()>770 and pin0.read_analog()>770: #paste
-		if not clipBoard==None:
+	if pin1.read_analog()>base and pin0.read_analog()>base: #paste
+		if not clipBoard==None: 
 			img=clipBoard
-		sleep(200)
-		display.scroll("pasted")
+		delay()
+		say("pasted")
 
-	if pin0.read_analog()>770 and button_b.is_pressed(): #go down and load state
-		with open(currFile, 'w') as art: #save
-			art.write(parseImage(img))
+	if pin0.read_analog()>base and button_b.is_pressed(): #go down and load state
+		write(currFile,parseImage(img))
 
 		saveSlot-=1 #increment save slot
-		display.scroll(str(saveSlot)) #show slot
+		say(str(saveSlot)) #show slot
 		currFile="art"+str(saveSlot) #update current file
 
-		try: #load state
-			with open(currFile) as art:
-				img = unParseImage(art.read())
-		except OSError: #if file doesnt exist, write empty and load
-			with open(currFile,'w') as art:
-				img=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
-				art.write(parseImage(img))
+		img=unParseImage(read(currFile,parseImage(blank)))
 				
-		with open("saveSlot.txt", 'w') as slot: #save save slot
-			slot.write(str(saveSlot))
+		write("saveSlot.txt",saveSlot)
 
-	if pin0.read_analog()>770 and button_a.is_pressed(): #go up and load
-		with open(currFile, 'w') as art: #save
-			art.write(parseImage(img))
+	if pin0.read_analog()>base and button_a.is_pressed(): #go up and load
+		write(currFile,parseImage(img))
 
 		saveSlot+=1 #increment save slot
-		display.scroll(str(saveSlot)) #show slot
+		say(str(saveSlot)) #show slot
 		currFile="art"+str(saveSlot) #update current file
 
-		try: #load state
-			with open(currFile) as art:
-				img = unParseImage(art.read())
-		except OSError: #if file doesnt exist, write empty and load
-			with open(currFile,'w') as art:
-				img=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
-				art.write(parseImage(img))
+		img=unParseImage(read(currFile,parseImage(blank)))
 				
+		write("saveSlot.txt",saveSlot)
 
-		with open("saveSlot.txt", 'w') as slot: #save save slot
-			slot.write(str(saveSlot))
+	#radio
+	if pin2.read_analog()>base and button_b.is_pressed(): #transmit
+		send(parseImage(img))
+		say("sent")
 
+	if button_a.is_pressed() and button_b.is_pressed(): #change group
+		if group==255: #make group 0 if currently 255
+			group=0
+		else:
+			group+=1 #increment group
+		say(str(group))
+		sleep(500) #longer delay for easier group control
+		write("group.txt",str(group))
 
 	#others
-	if pin1.read_analog()>770 and button_b.is_pressed(): #clear screen (requires confrmation)
+	if pin1.read_analog()>base and button_b.is_pressed(): #clear screen (requires confrmation)
 		iteration=0
-		display.scroll("Do you want to clear screen? Hold B to confirm.")
+		say("Hold B to confirm.")
 		if button_b.is_pressed():
-			img=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
-			display.scroll("screen cleared.")
+			img=blank
+			say("screen cleared.")
 
 	display.show(Image(parseImage(img))) #refresh display
 
-	if pin2.read_analog()>770 : 
+	if pin2.read_analog()>base : 
 		iteration=0 #make sure cursor doesnt flash during color changing
 		if img[coords[1]][coords[0]]==9: #make color 0 if currently 9
 			img[coords[1]][coords[0]]=0
@@ -191,4 +198,3 @@ while True: #controls
 			img[coords[1]][coords[0]]=int(img[coords[1]][coords[0]])+1 #increment color
 		display.show(Image(parseImage(img))) #refresh display
 		sleep(500) #longer delay for easier color control
-
