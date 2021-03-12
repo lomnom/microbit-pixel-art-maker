@@ -119,10 +119,13 @@ while True: #controls
 
 	if (iteration%50)==0: #check messages
 		message=receive()
-		if not message==None: #check if got new message
+		try:
+			image=unParseImage(message)
+			clipBoard=image #put in clipboard
 			display.show(Image("66666:66066:60606:60006:66666")) #mail symbol
-			sleep("300")
-			clipBoard=unParseImage(receivedString) #put in clipboard
+			sleep(1000)
+		except:
+			pass
 
 	#loading and saving
 	if pin2.read_analog()>base and pin0.read_analog()>base: #save 2+0
