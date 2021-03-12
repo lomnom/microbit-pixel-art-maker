@@ -1,8 +1,8 @@
+l=None
 k='group.txt'
 j='0'
 i=True
 h=open
-d=None
 c='art'
 b='saveSlot.txt'
 a=int
@@ -36,13 +36,13 @@ E=a(K(b,j))
 F=c+I(E)
 B=S(K(F,'00000:00000:00000:00000:00000'))
 M=a(K(k,j))
-from radio import on,config as e,send,receive as f
+from radio import on,config as d,send,receive as e
 on()
-e(group=M)
+d(group=M)
 A=[0,0]
 G=0
-l=0
-X=d
+m=0
+X=l
 C=770
 while i:
 	G+=1
@@ -68,13 +68,14 @@ while i:
 		T(A);G=0
 	if G%7==0:T(A)
 	if G%50==0:
-		g=f()
-		if not g==d:R.show(Y('66666:66066:60606:60006:66666'));V('300');X=S(receivedString)
+		f=e()
+		try:g=S(f);X=g;R.show(Y('66666:66066:60606:60006:66666'));V(1000)
+		except:pass
 	if U.read_analog()>C and N.read_analog()>C:J(F,H(B));D('saved')
 	if O.read_analog()>C and U.read_analog()>C:B=S(K(F,W));D('loaded')
 	if U.read_analog()>C and P.is_pressed():X=B;L();D('copied')
 	if O.read_analog()>C and N.read_analog()>C:
-		if not X==d:B=X
+		if not X==l:B=X
 		L();D('pasted')
 	if N.read_analog()>C and Q.is_pressed():J(F,H(B));E-=1;D(I(E));F=c+I(E);B=S(K(F,H(W)));J(b,E)
 	if N.read_analog()>C and P.is_pressed():J(F,H(B));E+=1;D(I(E));F=c+I(E);B=S(K(F,H(W)));J(b,E)
