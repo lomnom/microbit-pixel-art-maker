@@ -9,20 +9,26 @@ https://python-minifier.com/
 
 ## controls:
 ### movement:
-- A - left
-- B - right
-- 0 - up
-- 1 - down
-  drawing:
-    2 - change darkness
-  saving and loading:
-    0+2 - save
-    1+2 - load
-    0+A - go up save slot
-    0+B - go down save slot
-  copying and pasting:
-    A+2 - copy
-    0+1 - paste
-  radio:
-    A+B - change group
-    A+1 - transmit
+- button A - left
+- button B - right
+- touching pin 0 - up
+- touching pin 1 - down
+### drawing:
+- pin 2 - change darkness level
+### saving and loading:
+- pin 0+ pin 2 - save
+- pin 1+ pin 2 - load
+- pin 0+ pin A - go up save slot
+- pin 0+ pin B - go down save slot
+### copying and pasting:
+- A+2 - copy
+- 0+1 - paste
+### radio:
+  - A+B - change group
+  - A+1 - broadcast to every microbit in same group
+
+## Sendng art:
+1. Set the group on 2 microbits to be the same
+2. Broadcast on microbit 1
+3. a mail symbol should sppear on microbit 2
+4. the art is now in microbit 2's clipboard
